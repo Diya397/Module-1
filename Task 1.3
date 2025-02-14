@@ -1,0 +1,71 @@
+#define PIR_SENSOR 2       // PIR Motion sensor connected to digital pin 2
+#define SOUND_SENSOR 3     // Sound sensor connected to digital pin 3
+#define SOUND_LED 12       // External LED for sound sensor
+#define TRIG_PIN 4         // Ultrasonic sensor trigger pin
+
+
+volatile bool motionDetected = false;  // Flag for motion detection
+volatile bool soundDetected = false;   // Flag for sound detection
+
+// Interrupt Service Routine (ISR) for Motion Sensor
+void motionISR() {
+    motionDetected = true;  
+}
+
+// Interrupt Service Routine (ISR) for Sound Sensor
+void soundISR() {
+    soundDetected = true;  
+}
+
+void setup() {
+    pinMode(PIR_SENSOR, INPUT);
+    pinMode(SOUND_SENSOR, INPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(SOUND_LED, OUTPUT);
+    pinMode(TRIG_PIN, OUTPUT);
+    Serial.begin(9600);
+
+    attachInterrupt(digitalPinToInterrupt(PIR_SENSOR), motionISR, RISING);  // Interrupt for motion sensor
+    attachInterrupt(digitalPinToInterrupt(SOUND_SENSOR), soundISR, RISING); // Interrupt for sound sensor
+}
+
+// Function to measure distance using the Ultrasonic sensor
+float getDistance() {
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+
+   
+    
+    
+}
+
+void loop() {
+    if (motionDetected) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        Serial.println("Motion detected! LED ON");
+        delay(1000);  
+        digitalWrite(LED_BUILTIN, LOW);
+        Serial.println("LED OFF");
+        motionDetected = false;
+    }
+
+    if (soundDetected) {
+        digitalWrite(SOUND_LED, HIGH);
+        Serial.println("Loud sound detected! SOUND_LED ON");
+        delay(500);  
+        digitalWrite(SOUND_LED, LOW);
+        Serial.println("SOUND_LED OFF");
+        soundDetected = false;
+    }
+
+    // Measure and print distance from the Ultrasonic sensor
+    float distance = getDistance();
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
+    delay(500);  // Delay for stability
+}
