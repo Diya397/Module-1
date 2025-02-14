@@ -1,0 +1,29 @@
+#define PIR_SENSOR 2  // Motion sensor connected to digital pin 2
+#define LED 13        // Built-in LED on pin 13
+
+volatile bool motionDetected = false; // Stores motion detection state
+
+void motionISR() {
+    motionDetected = true;  // Set flag when motion is detected
+}
+
+void setup() {
+    pinMode(PIR_SENSOR, INPUT);
+    pinMode(LED, OUTPUT);
+    Serial.begin(9600);
+
+    attachInterrupt(digitalPinToInterrupt(PIR_SENSOR), motionISR, RISING); // Trigger on motion detection
+}
+
+void loop() {
+    if (motionDetected) {  // Check if ISR detected motion
+        digitalWrite(LED, HIGH);
+        Serial.println("Motion detected! LED ON");
+
+        delay(1000);  // Small delay for stability
+        digitalWrite(LED, LOW);
+        Serial.println("LED OFF");
+
+        motionDetected = false;  // Reset motion flag
+    }
+}
